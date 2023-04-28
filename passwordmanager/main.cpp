@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ private:
 };
 
 int main() {
+     /*
     User user1("Alice", true);
     User user2("Bob", false);
 
@@ -37,7 +39,44 @@ int main() {
     admin.AddUser(user1);
     admin.AddUser(user2);
 
-    cout << "Total number of users: " << admin.GetUserCount() << endl;
+    //cout << "Total number of users: " << admin.GetUserCount() << endl;
+*/
+// Variable declaration
+   int determine=0;
+   string adminPass="";
+   string file_content;
+   const char* adminfile="admin.txt";
+   while(true){
+    cout<< "Are you a regular user or an admin?? \n1. Regular user\n2. Admin\n3. Exit\n"<<endl;
+    cin>>determine;
+    if(determine==1){
+        //User Part
+        cout<<"You are a regular user"<<endl;
+    }else if(determine==2){
+         //Admin part
+              cout<<"Enter admin password \n1 press 3 to exit"<<endl;
+          cin>>adminPass;
+          ifstream file(adminfile);
+          //Check login status of admin
+          while (getline(file, file_content)) {
+    if (file_content == adminPass) {
+      cout << "Successfully Login as admin\n";
+             //  while (true){
+            //}
 
+    }else{
+        cout<< "Please enter correct credentials"<<endl;
+    }
+         }
+
+         //cout<<"You are an admin"<<endl;
+    }else if(determine==3){
+    // Exit the program
+       cout<<"Thank you for using our program"<<endl;
+       break;
+    }else{
+       cout<<"Please give appropriate input"<<endl;
+    }
+   }
     return 0;
 }
