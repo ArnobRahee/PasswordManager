@@ -4,7 +4,9 @@
 #include <fstream>
 
 using namespace std;
-
+const int USERS = 1000;
+string UserList[USERS];
+int NoOfUser;
 class User {
 public:
     User(string name, bool is_premium) : name_(name), is_premium_(is_premium) {}
@@ -19,10 +21,29 @@ private:
 
 class Admin {
 public:
-    Admin(string password) : password_(password) {}
+    Admin();
 
-    void AddUser(User user) { users_.push_back(user); }
+
     void RemoveUser(int index) { users_.erase(users_.begin() + index); }
+
+    void ViewUsers(string filename){
+        ifstream infile(filename.c_str());
+        if (!infile) {
+        cerr << "There was an error in displaying users" <<  endl;
+
+    }else{
+        NoOfUser=0;
+       string line;
+       while (getline(infile, line) && NoOfUser < USERS) {
+        UserList[NoOfUser++] = line;
+    }
+
+    for (int i = 0; i < NoOfUser; i++) {
+        cout << "Line " << i+1 << ": " << UserList[i] << endl;
+    }
+    }
+
+    };
     int GetUserCount() const { return users_.size(); }
 
 private:
@@ -42,10 +63,11 @@ int main() {
     //cout << "Total number of users: " << admin.GetUserCount() << endl;
 */
 // Variable declaration
-   int determine=0;
+   int determine;
    string adminPass="";
    string file_content;
    const char* adminfile="admin.txt";
+   string userfiles="users.txt";
    while(true){
     cout<< "Are you a regular user or an admin?? \n1. Regular user\n2. Admin\n3. Exit\n"<<endl;
     cin>>determine;
@@ -54,15 +76,29 @@ int main() {
         cout<<"You are a regular user"<<endl;
     }else if(determine==2){
          //Admin part
-              cout<<"Enter admin password \n1 press 3 to exit"<<endl;
+              cout<<"Enter admin password \n press 3 to exit"<<endl;
           cin>>adminPass;
           ifstream file(adminfile);
           //Check login status of admin
           while (getline(file, file_content)) {
     if (file_content == adminPass) {
       cout << "Successfully Login as admin\n";
-             //  while (true){
-            //}
+               while (true){
+                    Admin admin;
+                     cout<< "What do you want to do today?? \n1. View users user\n2. Delete users\n3. Logout\n"<<endl;
+                     cin>>determine;
+                     if(determine==1){
+                        //View Users
+                        admin.ViewUsers("users.txt");
+                     }
+                     if(determine==2){
+                        //Delete Users
+                     }
+                     if(determine==3){
+                        //Logout
+                        break;
+                     }
+                     }
 
     }else{
         cout<< "Please enter correct credentials"<<endl;
