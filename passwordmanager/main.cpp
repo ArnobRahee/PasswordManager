@@ -69,7 +69,15 @@ public:
             cout << "Number of passwords: " << counts-1 << endl;
             infile.close();
         }
-    };
+    }
+    void writePasswords(string website,string password){
+       ofstream outdata;
+       string filename = GetName();
+       filename += ".txt";
+       outdata.open(filename.c_str());
+       outdata << website<<" "<<password << endl;
+
+    }
 
     bool user_exists(){
         ifstream file;
@@ -187,6 +195,7 @@ int main() {
     const char* adminfile = "admin.txt";
     string userfiles = "users.txt";
     bool exsists;
+    string website;
     while (true) {
         cout << "Are you a regular user or an admin?? \n1. Regular user\n2. Admin\n3. Exit\n" << endl;
         cin >> determine;
@@ -211,7 +220,11 @@ int main() {
                         user->ViewPassword();
                     }
                     else if(determine==2){
-                        cout<<"New passwords"<<endl;
+                        cout<<"Enter website name"<<endl;
+                        cin>>website;
+                        cout<<"Enter password"<<endl;
+                        cin>>password;
+                        user->writePasswords(website,password);
                     }
                     else if(determine==3){
                        cout<<"Remove or change passwords"<<endl;
