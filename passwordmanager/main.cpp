@@ -71,11 +71,25 @@ public:
         }
     }
     void writePasswords(string website,string password){
+        bool found=false;
        ofstream outdata;
+       std::ifstream fin;
        string filename = GetName();
        filename += ".txt";
-       outdata.open(filename.c_str(), std::ios_base::app);
-       outdata << website<<" "<<password << endl;
+       fin.open(filename.c_str());
+       while(getline(fin,line)){
+         if (line.find(website) != std::string::npos){
+            found=true;
+         }
+       }
+       if(found){
+        cout<<"Password already exsist"<<endl;
+       }else{
+           outdata.open(filename.c_str(), std::ios_base::app);
+           outdata << website<<" "<<password << endl;
+           cout<<"Password added sucessfully"<<endl;
+       }
+
        outdata.close();
 
     }
@@ -94,10 +108,13 @@ public:
     if (line.find(website) != std::string::npos) {
         // replace the password on the line that contains the website name
         line = website + " " + password;
+         temp << line << std::endl;
         found = true;
+    }else{
+         temp << line << std::endl;
     }
     // write the line to the temp file
-    temp << line << std::endl;
+
 }
 
       temp.close();
@@ -353,5 +370,4 @@ int main() {
 
     }
 }
-
 
