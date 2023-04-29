@@ -18,10 +18,12 @@ string line;
 string file_content;
 string status;
 vector<string> new_lines;
+
 class User {
 public:
-    User(string name_, string password_, bool premium_): name_(name_), password_(password_), premium_(premium_) {};
+    User(string name_, string password_): name_(name_), password_(password_) {};
 
+     // Checks exsistence of the user
     bool Existence(){
         std::ifstream file;
         string filename = GetName() + ".txt";
@@ -46,9 +48,7 @@ public:
         return password_;
     };
 
-    bool is_premium() const{
-        return premium_;
-    };
+
 
     void ViewPassword() {
         string filename = GetName() + ".txt";
@@ -71,30 +71,17 @@ public:
         }
     };
 
-    bool user_not_exists(){
-        bool found = false;
-        string line;
-        std::ifstream fin;
-        fin.open("users.txt");
-        std::ofstream temp;
-        temp.open("temp.txt");
-        while (getline(fin, line)) {
-            if (line.find(GetName()) == std::string::npos){
-                temp << line << std::endl;
-            } else {
-                found = true;
-                break;
-            }
-        }
-        fin.close();
-        temp.close();
-        remove("users.txt");
-        rename("temp.txt", "users.txt");
-        return found;
+    bool user_exists(){
+        ifstream file;
+        string name=GetName()+".txt";
+        file.open(name.c_str());
+        return file;
+
     }
 
-    void signup(string email){
-        if (!user_not_exists()) {
+    void signup(string email,bool premium){
+
+
             string filename = GetName();
             filename += ".txt";
             std::ofstream outfile (filename.c_str());
@@ -106,23 +93,24 @@ public:
                 //exit(1);
             } else {
 
-                if(is_premium()){
-                    status="free";
+                if(premium){
+                    status="premium";
                 }else{
-                     status="premium";
+                     status="free";
                 }
                 outdata << name_ << " " << email << " "<<status<<endl;
                 outdata.close();
-            }
-        } else {
-            cout << "User already exists" << endl;
+
         }
-    };
+
+    }
 
 private:
     string name_;
     string password_;
-    bool premium_;
+public:
+     bool premium_;
+
 };
 
 class Admin {
@@ -172,10 +160,8 @@ public:
        cout<<"User not found"<<endl;
     }
 }
-
-};
-
-    void ViewUsers(string filename) {
+    }
+      void ViewUsers(string filename) {
         ifstream infile(filename.c_str());
         //Check if the file exsist or not
         if (!infile) {
@@ -189,16 +175,10 @@ public:
             for (int i = 0; i < NoOfUser; i++) {
                 cout<< UserList[i] << endl;
             }
-            cout<<"Number of users using the system "<<NoOfUser<<endl;
+
             infile.close();
         }
-    };
-
-
-
-private:
-    string password_;
-    vector<User> users_;
+    }
 };
 
 int main() {
@@ -220,8 +200,9 @@ int main() {
                 cout<<"Enter your username or password"<<endl;
                 cin>>username;
                 cin>>password;
-                User* user=new User(username,password,false);
+                User* user=new User(username,password);
                 exsists=user->Existence();
+
                 if(exsists){
                     cout<<"Welcome to our password manager what do you want to do today \n1. View your passwords \n2. Write down new passwords \n3. Change passwords or Remove passwords\n4. Logout";
                     while(true){
@@ -257,19 +238,24 @@ int main() {
                 cin>>email;
                 cout<<"Enter password"<<endl;
                 cin>>password;
+                User* user=new User(username,password);
+                if(user->user_exists()){
+                    cout<<"User already exsist"<<endl;
+                }else{
                 cout <<"Do you wish to become a premium user? if so enter\n1. Free\n2. Premium"<<endl;
                 cin >> determine;
                 if(determine==1){
-                     User* user=new User(username,password,false);
-                     user->signup(email);
+                     user->signup(email,false);
                 }else if(determine==2){
-                      User* user=new User(username,password,true);
-                      user->signup(email);
+
+                      user->signup(email,true);
                 }
 
-            }else{
+            }
+                }else{
                cout<<"Please give proper input"<<endl;
             }
+
         } else if (determine == 2) {
             // Admin part
             cout << "Enter admin password \n press 3 to exit" << endl;
@@ -314,4 +300,5 @@ int main() {
 
     }
 }
+
 
