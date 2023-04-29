@@ -7,39 +7,122 @@
 using namespace std;
 
 const int USERS = 1000;
+const int freeUser=6;
+const int premiumUser=1000;
 string UserList[USERS];
 int NoOfUser;
 string username;
 string password;
+string email;
 string line;
 string file_content;
+string status;
 vector<string> new_lines;
 class User {
 public:
-    User(string name, string password): name_(name), password_(password) {}
-     bool Exsistence(){
-       std::ifstream file;
-       string filename=GetName()+".txt";
-       file.open(filename.c_str());
-       if(file){
-        getline(file,line);
-        if(line==GetPassword()){
-            return true;
+    User(string name_, string password_, bool premium_): name_(name_), password_(password_), premium_(premium_) {};
+
+    bool Existence(){
+        std::ifstream file;
+        string filename = GetName() + ".txt";
+        file.open(filename.c_str());
+        if (file.is_open()) {
+            string line;
+            getline(file, line);
+            if (line == GetPassword()) {
+                file.close();
+                return true;
+            }
+            file.close();
         }
-       }
-       return false;
-     }
+        return false;
+    };
+
     string GetName() const {
         return name_;
+    };
 
-        }
-     string GetPassword() const {
+    string GetPassword() const {
         return password_;
-     }
+    };
+
+    bool is_premium() const{
+        return premium_;
+    };
+
+    void ViewPassword() {
+        string filename = GetName() + ".txt";
+        ifstream infile(filename.c_str());
+        if (!infile.is_open()) {
+            cerr << "There was an error in displaying passwords" << endl;
+        } else {
+            string UserList[USERS];
+            int counts = 0;
+            string line;
+            while (getline(infile, line) && counts < USERS) {
+                UserList[counts++] = line;
+            }
+
+            for (int i = 1; i < counts; i++) {
+                cout << UserList[i] << endl;
+            }
+            cout << "Number of passwords: " << counts-1 << endl;
+            infile.close();
+        }
+    };
+
+    bool user_not_exists(){
+        bool found = false;
+        string line;
+        std::ifstream fin;
+        fin.open("users.txt");
+        std::ofstream temp;
+        temp.open("temp.txt");
+        while (getline(fin, line)) {
+            if (line.find(GetName()) == std::string::npos){
+                temp << line << std::endl;
+            } else {
+                found = true;
+                break;
+            }
+        }
+        fin.close();
+        temp.close();
+        remove("users.txt");
+        rename("temp.txt", "users.txt");
+        return found;
+    }
+
+    void signup(string email){
+        if (!user_not_exists()) {
+            string filename = GetName();
+            filename += ".txt";
+            std::ofstream outfile (filename.c_str());
+            outfile << password_ << std::endl;
+            ofstream outdata;
+            outdata.open("users.txt", std::ios_base::app);
+            if (!outdata.is_open()) {
+                cerr << "Problem signing up" << endl;
+                //exit(1);
+            } else {
+
+                if(is_premium()){
+                    status="free";
+                }else{
+                     status="premium";
+                }
+                outdata << name_ << " " << email << " "<<status<<endl;
+                outdata.close();
+            }
+        } else {
+            cout << "User already exists" << endl;
+        }
+    };
+
 private:
     string name_;
     string password_;
-
+    bool premium_;
 };
 
 class Admin {
@@ -123,7 +206,7 @@ int main() {
     string adminPass = "";
     const char* adminfile = "admin.txt";
     string userfiles = "users.txt";
-
+    bool exsists;
     while (true) {
         cout << "Are you a regular user or an admin?? \n1. Regular user\n2. Admin\n3. Exit\n" << endl;
         cin >> determine;
@@ -137,16 +220,53 @@ int main() {
                 cout<<"Enter your username or password"<<endl;
                 cin>>username;
                 cin>>password;
-                User user(username,password);
-                if(user.Exsistence()){
-                    cout<<"Good you exsist";
+                User* user=new User(username,password,false);
+                exsists=user->Existence();
+                if(exsists){
+                    cout<<"Welcome to our password manager what do you want to do today \n1. View your passwords \n2. Write down new passwords \n3. Change passwords or Remove passwords\n4. Logout";
+                    while(true){
+                         cin >> determine;
+                    if(determine==1){
+                        user->ViewPassword();
+                    }
+                    else if(determine==2){
+                        cout<<"New passwords"<<endl;
+                    }
+                    else if(determine==3){
+                       cout<<"Remove or change passwords"<<endl;
+                    }
+                    else if(determine==4){
+                        cout<<"It was nice having you bye bye\n"<<endl;
+                        break;
+                    }
+                    else{
+                        cout<<"Inappropriate input\n"<<endl;
+                    }
+                    }
+
                 }else{
-                   cout<<"Sorry username or password not found";
-                   //delete user;
+                   cout<<"Sorry username or password not found\n";
+                   delete user;
                 }
             }
            else if(determine==2){
-                cout<<"You are a new user"<<endl;
+                cout<<"You are a new user please sign up by entering your username, email and password\n"<<endl;
+                cout<<"Enter username"<<endl;
+                cin>>username;
+                cout<<"Enter email"<<endl;
+                cin>>email;
+                cout<<"Enter password"<<endl;
+                cin>>password;
+                cout <<"Do you wish to become a premium user? if so enter\n1. Free\n2. Premium"<<endl;
+                cin >> determine;
+                if(determine==1){
+                     User* user=new User(username,password,false);
+                     user->signup(email);
+                }else if(determine==2){
+                      User* user=new User(username,password,true);
+                      user->signup(email);
+                }
+
             }else{
                cout<<"Please give proper input"<<endl;
             }
@@ -161,21 +281,26 @@ int main() {
                 if (file_content == adminPass) {
                     cout << "Successfully Login as admin\n";
                     Admin admin;
-
+                    cout << "What do you want to do today?? \n1. View users user\n2. Delete users\n3. Logout\n" << endl;
                     while (true) {
-                        cout << "What do you want to do today?? \n1. View users user\n2. Delete users\n3. Logout\n" << endl;
-                        cin >> determine;
+
+
+                             cin >> determine;
 
                         if (determine == 1) {
                             // View Users
                             admin.ViewUsers("users.txt");
                         } else if (determine == 2) {
                             //Remove users
-                            admin.RemoveUser("users.txt","Rahee");
+                            cout<<"Enter name of user you want to remove"<<endl;
+                            cin>>username;
+                            admin.RemoveUser("users.txt",username);
                         } else if (determine == 3) {
                             // Logout
                             break;
                         }
+
+
                     }
                 } else {
                     cout << "Please enter correct credentials" << endl;
@@ -186,7 +311,7 @@ int main() {
             cout<<"Thank you for using our program"<<endl;
             break;
         }
-        username="";
-        password="";
+
     }
 }
+
