@@ -74,11 +74,47 @@ public:
        ofstream outdata;
        string filename = GetName();
        filename += ".txt";
-       outdata.open(filename.c_str());
+       outdata.open(filename.c_str(), std::ios_base::app);
        outdata << website<<" "<<password << endl;
+       outdata.close();
 
     }
+    void changePassword(std::string website,std::string password){
+      bool found=false;
+      string usertxt=GetName()+".txt";
+      std::ifstream fin;
+    fin.open(usertxt.c_str());
+     if (fin.fail()) {
+    std::cerr << "Failed to change"<<endl;
 
+}else{
+       std::ofstream temp;
+       temp.open("temp.txt");
+       while (getline(fin, line)) {
+    if (line.find(website) != std::string::npos) {
+        // replace the password on the line that contains the website name
+        line = website + " " + password;
+        found = true;
+    }
+    // write the line to the temp file
+    temp << line << std::endl;
+}
+
+      temp.close();
+      fin.close();
+
+    // required conversion for remove and rename functions
+    std::remove(usertxt.c_str());
+    std::rename("temp.txt", usertxt.c_str());
+     if(found){
+        cout<<"Your password has been changed"<<endl;
+     }else{
+         cout<<"Please make sure that the website name is spelled correctly or use View Password option to see if you saved it"<<endl;
+     }
+
+    //
+    }
+    }
     bool user_exists(){
         ifstream file;
         string name=GetName()+".txt";
@@ -213,7 +249,7 @@ int main() {
                 exsists=user->Existence();
 
                 if(exsists){
-                    cout<<"Welcome to our password manager what do you want to do today \n1. View your passwords \n2. Write down new passwords \n3. Change passwords or Remove passwords\n4. Logout";
+                    cout<<"Welcome to our password manager what do you want to do today \n1. View your passwords \n2. Write down new passwords \n3. Change passwords\n4. Logout\n";
                     while(true){
                          cin >> determine;
                     if(determine==1){
@@ -227,7 +263,11 @@ int main() {
                         user->writePasswords(website,password);
                     }
                     else if(determine==3){
-                       cout<<"Remove or change passwords"<<endl;
+                       cout<<"Name of website you want to change"<<endl;
+                       cin>>username;
+                       cout<<"Type your desired password"<<endl;
+                       cin>>password;
+                       user->changePassword(username,password);
                     }
                     else if(determine==4){
                         cout<<"It was nice having you bye bye\n"<<endl;
